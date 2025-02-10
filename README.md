@@ -4,7 +4,7 @@ Add automatic captions to YouTube & TikTok Shorts (and other videos) using Whisp
 
 ## Demo
 
-![Demo](assets/demo/demo.gif)
+![Demo](demo/demo.gif)
 
 ## Quick Start
 
