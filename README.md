@@ -14,6 +14,13 @@ Install shortcap:
 pip install shortcap
 ```
 
+Set required environment variables for OpenAI API:
+
+```bash
+export OPENAI_BASE_URL="your_openai_base_url"
+export OPENAI_API_KEY="your_openai_api_key"
+```
+
 Use the command-line interface:
 
 ```bash

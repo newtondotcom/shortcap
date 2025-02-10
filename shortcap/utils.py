@@ -5,6 +5,7 @@ from .text_renderer import create_text_ex, blur_text_clip
 from typing import List, Tuple, Dict, Any, Callable
 import logging
 from functools import lru_cache
+import pkg_resources
 
 logger = logging.getLogger('shortcap.utils')
 
@@ -20,25 +21,22 @@ def ffmpeg(command: List[str]) -> subprocess.CompletedProcess:
         raise RuntimeError(f"FFmpeg command failed: {e.stderr}")
 
 def get_font_path(font: str) -> str:
+    """Get the full path to a font file."""
+    if font == DEFAULT_FONT:
+        font_path = pkg_resources.resource_filename('shortcap', 'assets/fonts/TitanOne-Regular.ttf')
+        if os.path.exists(font_path):
+            return font_path
+        logger.warning(f"Default font not found at {font_path}, falling back to system font")
+        return "Arial"
+        
     if os.path.exists(font):
         return font
-
-    # Get the directory of the current file (utils.py)
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Go up one level to the project root
-    package_root = os.path.dirname(current_dir)
-    
-    # Construct the path to the assets directory
-    assets_dir = os.path.join(package_root, "assets")
-    
-    # Construct the full path to the font file
-    font_path = os.path.join(assets_dir, "fonts", font)
-
-    if not os.path.exists(font_path):
-        raise FileNotFoundError(f"Font '{font}' not found at {font_path}")
-
-    return font_path
+        
+    # 如果是系统字体名称，直接返回
+    if font in ["Arial", "Helvetica"]:
+        return font
+        
+    raise FileNotFoundError(f"Font not found: {font}")
 
 def detect_local_whisper(print_info: bool) -> bool:
     try:

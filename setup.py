@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from setuptools import setup, find_packages
 
 def get_requirements():
@@ -6,14 +8,18 @@ def get_requirements():
 
 setup(
     name='shortcap',
-    version='1.0.0',
-    packages=['shortcap'],
+    version='1.0.5',
+    packages=find_packages(),
     install_requires=get_requirements(),
     extras_require = {
         'local_whisper': ["openai-whisper"],
     },
     package_data={
-        'shortcap': ['assets/**/*'],
+        'shortcap': [
+            'assets/*',
+            'assets/fonts/*',
+            'assets/fonts/*.ttf',
+        ],
     },
     include_package_data=True,
     url='https://github.com/SmartClipAI/shortcap',

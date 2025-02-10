@@ -1,4 +1,5 @@
-recursive-include shortcap/assets *
 include README.md
 include LICENSE
 include requirements.txt
+recursive-include shortcap/assets *
+recursive-include shortcap/assets/fonts *.ttf
