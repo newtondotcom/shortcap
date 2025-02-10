@@ -22,13 +22,6 @@ def ffmpeg(command: List[str]) -> subprocess.CompletedProcess:
 
 def get_font_path(font: str) -> str:
     """Get the full path to a font file."""
-    if font == DEFAULT_FONT:
-        font_path = pkg_resources.resource_filename('shortcap', 'assets/fonts/TitanOne-Regular.ttf')
-        if os.path.exists(font_path):
-            return font_path
-        logger.warning(f"Default font not found at {font_path}, falling back to system font")
-        return "Arial"
-        
     if os.path.exists(font):
         return font
         

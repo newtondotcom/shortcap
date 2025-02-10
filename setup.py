@@ -8,7 +8,7 @@ def get_requirements():
 
 setup(
     name='shortcap',
-    version='1.0.5',
+    version='1.0.6',
     packages=find_packages(),
     install_requires=get_requirements(),
     extras_require = {

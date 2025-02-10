@@ -71,9 +71,6 @@ def add_captions(
         # 修改字体处理逻辑
         if font == DEFAULT_FONT:
             font = pkg_resources.resource_filename('shortcap', 'assets/fonts/TitanOne-Regular.ttf')
-            if not os.path.exists(font):
-                logger.warning(f"Default font not found at {font}, falling back to system font")
-                font = "Arial"  # 使用系统字体作为后备
         else:
             font = get_font_path(font)
 
