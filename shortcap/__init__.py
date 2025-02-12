@@ -29,6 +29,7 @@ def configure_logging(log_file=None):
     logger = setup_logging(log_file)
 
 from .add_captions import add_captions
+from importlib.metadata import version
 
+__version__ = version("shortcap")
 __all__ = ['add_captions', 'configure_logging']
-__version__ = '1.0.0'
