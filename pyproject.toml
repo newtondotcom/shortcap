@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shortcap"
+version = "1.0.8"
+description = "Add Automatic Captions to Short Videos with AI"
+readme = "README.md"
+authors = [
+    { name = "SmartClipAI", email = "jacky.xbb@gmail.com" },
+    { name = "Newtondotcom", email = "asphalt9fr@gmail.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+
+dependencies = [
+    "moviepy==1.0.3",
+    "whisperx",
+]
+
+[project.optional-dependencies]
+local_whisper = [
+    "openai-whisper"
+]
+
+[project.urls]
+Homepage = "https://github.com/newtondotcom/shortcap"
+
+[project.scripts]
+shortcap = "shortcap.cli:main"
+
+[tool.setuptools.package-data]
+shortcap = [
+    "assets/*",
+    "assets/fonts/*",
+    "assets/fonts/*.ttf"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
