@@ -12,6 +12,124 @@ logger = logging.getLogger('shortcap.utils')
 shadow_cache = {}
 lines_cache = {}
 
+
+def populate_tabs(segments):
+    """Extracts words and timings from transcriptions and populates 'tab'."""
+    tab = []
+    for s in segments:
+        print(s["words"])
+        exit()
+        for i, word in enumerate(s["words"]):
+            if i == len(s["words"]) - 1:
+                tab.append({
+                    "start" : word["start"],
+                    "end":  word["end"],
+                    "word" : word["word"],
+                    "final" : True})
+                # Last word in a sentence
+            else:
+                tab.append({
+                    "start" : word["start"],
+                    "end":  word["end"],
+                    "word" : word["word"],
+                    "final" : False})
+                # Intermediate word
+    return tab
+
+
+def analyse_tab_durations(tab):
+    """Calculates average time and length of words in 'tab' for grouping."""
+    moyenne_time = 0
+    moyenne_length = 0
+    new_tab = []
+    for j in tab:
+        start = j["start"]
+        end = j["end"]
+        word = j["word"]
+        moyenne_time += end - start
+        moyenne_length += len(word)
+    moyenne_length = moyenne_length / len(tab)
+    moyenne_time = moyenne_time / len(tab)
+
+    retenue = 0
+    seuil = 0.10  # Proximity threshold for grouping words
+
+    # Contain words within a group based on specified criteria
+    for j, word in enumerate(tab):
+        if retenue > 0:
+            retenue -= 1
+        else:
+            retenue = group_words_based_on_threshold(
+                tab, new_tab, seuil, j, word , moyenne_time, moyenne_length
+            )
+    return new_tab
+
+def group_words_based_on_threshold(
+    tab, new_tab, proximity_threshold, index, word, average_time, average_length
+):
+    """
+    Groups words based on specified thresholds and criteria.
+    """
+
+    def is_word_below_threshold(word, next_word=None):
+        """Checks if a word meets the threshold criteria."""
+        if next_word is None:
+            # Check if the word ends with "." or meets time/length criteria
+            if "." in word["word"]:
+                return True
+            return word["end"] - word["start"] < average_time or len(word["word"]) < average_length
+        else:
+            # Check proximity threshold between current word and next word
+            return word["end"] - word["start"] < proximity_threshold and "." not in word["word"]
+
+    # Initialize a new group with the current word
+    local_combined_words = {
+        "start": word["start"],
+        "end": word["end"],
+        "words": [word],
+        "text": word["word"],
+    }
+
+    # If the current word does not meet the threshold or is the last word in the list, append the group to new_tab
+    if not is_word_below_threshold(word) or index == len(tab) - 1:
+        new_tab.append(local_combined_words)
+        return 0
+
+    # Determine the number of words to juxtapose
+    words_to_juxtapose = min(4, len(tab) - index)
+    retenue = 0
+
+    # Loop through subsequent words to form a group based on the threshold criteria
+    for i in range(1, words_to_juxtapose):
+        current_word = tab[index + i]
+        previous_word = tab[index + i - 1]
+
+        if is_word_below_threshold(current_word) and is_word_below_threshold(
+            previous_word, current_word
+        ) or "." in current_word["word"]:
+            local_combined_words["words"].append(current_word)
+            local_combined_words["end"] = current_word["end"]
+            local_combined_words["text"] += " " + current_word["word"]
+            retenue += 1
+        else:
+            break  # Stop adding words to the group if threshold is not met and not a sentence-ending word
+
+    # Append the final group to the new_tab list
+    new_tab.append(local_combined_words)
+    return retenue
+
+def check_captions(captions):
+    for caption in captions:
+        # Check keys exist
+        if not all(key in caption for key in ["start", "end", "words","text"]):
+            raise ValueError("Word missing required keys (start, end, or word)")
+        for word in caption["words"]:
+            if not all(key in word for key in ["start", "end", "word","score"]):
+                print(word, caption)
+                raise ValueError("Word missing required keys (start, end, or word)")
+    logger.info("Words array is consistent")
+
+
 def ffmpeg(command: List[str]) -> subprocess.CompletedProcess:
     try:
         result = subprocess.run(command, capture_output=True, check=True, text=True)
@@ -24,11 +142,11 @@ def get_font_path(font: str) -> str:
     """Get the full path to a font file."""
     if os.path.exists(font):
         return font
-        
+
     # 如果是系统字体名称，直接返回
     if font in ["Arial", "Helvetica"]:
         return font
-        
+
     raise FileNotFoundError(f"Font not found: {font}")
 
 def detect_local_whisper(print_info: bool) -> bool:

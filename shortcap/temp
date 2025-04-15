@@ -1,0 +1,129 @@
+
+            for s in captions:
+                localtext = ""
+                globalstart = s[0][0]
+                globalend = s[-1][1]
+                color = colors[i_color]
+                i_color = (i_color + 1) % len(colors)
+
+                boiler = (
+                    "{\\k40\\fad(0,0)\\be1\\b\\bord2\\shad1\\1c&HFFFFFF&\\3c&H000000&\\q1\\b700"
+                    + position_subtitle
+                    + color
+                    + "} "
+                )
+                localtext = boiler
+
+                if len(s) == 4:
+                    boiler = (
+                        "{\\fad(0,0)\\be1\\b\\bord2\\shad1\\1c&HFFFFFF&\\3c&H000000&\\q1\\b700"
+                        + position_subtitle
+                        + color
+                        + "} "
+                    )
+                    localtext = boiler
+
+                    first_start = s[0][0]
+                    first_end = s[1][1]
+                    second_start = s[2][0]
+                    second_end = s[3][1]
+
+                    # Ensure no overlap
+                    if second_start < first_end:
+                        second_start = first_end + overlap_offset
+                    if s[2][0] < s[1][1]:
+                        s[2] = (s[1][1] + overlap_offset, s[2][1], s[2][2])
+                    if s[3][0] < s[2][1]:
+                        s[3] = (s[2][1] + overlap_offset, s[3][1], s[3][2])
+
+                    diff = abs(round(float(first_end - first_start) * 100))
+                    duration = "{" + colors[i_color] + "\\k" + str(diff) + "}"
+                    localtext += duration + s[0][2].upper() + " " + s[1][2].upper() + "\\N "
+
+                    i_color = (i_color + 1) % len(colors)
+                    color = colors[i_color]
+                    diff2 = abs(round(float(second_end - second_start) * 100))
+                    diff3 = abs(round(float(second_start - first_start) * 100))
+                    diff4 = abs(round(float(second_end - first_start) * 100))
+                    duration2 = (
+                        "{"
+                        + colors[i_color]
+                        + "\\k"
+                        + str(diff2)
+                        + "\\t("
+                        + str(diff3)
+                        + ","
+                        + str(diff4)
+                        + ",\\fscx110)"
+                        + "\\t("
+                        + str(diff3)
+                        + ","
+                        + str(diff4)
+                        + ",\\fscy110)}"
+                    )
+                    localtext += duration2 + s[2][2].upper() + " " + s[3][2].upper()
+                else:
+                    previous_end = None
+                    for segment in s:
+                        start = segment[0]
+                        end = segment[1]
+                        word = segment[2]
+                        if previous_end and start < previous_end:
+                            start = previous_end + overlap_offset
+                        delta = end - start
+                        duration = "{\\k" + str(abs(round(delta * 100))) + "}"
+                        localtext += duration + word.upper() + " "
+                        previous_end = end
+
+                style = "s" + str(random.randint(0, len(styles) - 1))
+
+                words = localtext.split("{\\q1")
+                if len(words) == 5:
+                    localtext = (words[1]
+                        + words[2]
+                        + words[3]
+                        + words[4]                    )
+
+                    format_seconds_to_hhmmss(globalstart)
+                    format_seconds_to_hhmmss(globalend)
+                    {localtext}
+
+
+
+
+        exit()
+        # Parse segments into captions that fit on the video
+        #for segment in captions:
+            # { start" : start,
+              #  "end":end,
+              #  "words" : word
+              # text
+
+            for word in segment["words"]:
+                # { start" : start,
+                      #  "end":end,
+                      #  "word" : word,
+                       # "final" : False}
+
+                if caption["start"] is None:
+                    caption["start"] = word["start"]
+
+                text = caption["text"]+word["word"]
+
+                caption_fits = allow_partial_sentences or not has_partial_sentence(text)
+                caption_fits = caption_fits and fit_function(text)
+
+                if caption_fits:
+                    caption["words"].append(word)
+                    caption["end"] = word["end"]
+                    caption["text"] = text
+                else:
+                    captions.append(caption)
+                    caption = {
+                        "start": word["start"],
+                        "end": word["end"],
+                        "words": [word],
+                        "text": word["word"],
+                    }
+
+        captions.append(caption)

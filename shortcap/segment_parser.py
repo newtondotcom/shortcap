@@ -1,5 +1,7 @@
 from typing import List, Dict, Callable, Any
 import logging
+from shortcap.utils import analyse_tab_durations, group_words_based_on_threshold, populate_tabs
+from shortcap.utils import check_captions
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,13 @@ def parse(
     allow_partial_sentences: bool = True,
 ) -> List[Dict[str, Any]]:
     try:
+        #captions = []
+        #words_flatten = populate_tabs(segments)
+        #captions = analyse_tab_durations(words_flatten)
+        #print(len(captions), len(words_flatten))
+        #return captions
+        check_captions(segments)
+
         captions = []
         caption = {
             "start": None,
@@ -36,6 +45,9 @@ def parse(
                     segments[s]["words"][w-1]["word"] += word["word"]
                     segments[s]["words"][w-1]["end"] = word["end"]
                     del segments[s]["words"][w]
+
+
+        check_captions(segments)
 
         # Parse segments into captions that fit on the video
         for segment in segments:
@@ -62,8 +74,9 @@ def parse(
                     }
 
         captions.append(caption)
-
+        print("here")
         return captions
+
     except Exception as e:
         logger.error(f"An error occurred while parsing segments: {str(e)}")
         raise SegmentParseError(f"Failed to parse segments: {str(e)}")

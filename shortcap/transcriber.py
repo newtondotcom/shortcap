@@ -1,6 +1,6 @@
 import logging
 from .config import (
-    DEVICE, 
+    DEVICE,
     BATCH_SIZE,
     COMPUTE_TYPE,
     MODEL
@@ -15,7 +15,7 @@ class TranscriptionError(Exception):
 
 def transcribe_with_api(
     audio_file,
-    prompt: str | None = None 
+    prompt: str | None = None
 ):
     exit()
     return []
@@ -48,7 +48,7 @@ def transcribe_locally(
     except Exception as e:
         logger.error(f"Error during local transcription: {str(e)}")
         raise TranscriptionError(f"Local transcription failed: {str(e)}")
-    
+
     if align_words:
         try:
             logger.info("Starting alignment")
@@ -58,7 +58,5 @@ def transcribe_locally(
         except Exception as e:
             logger.error(f"Error during local transcription: {str(e)}")
             raise TranscriptionError(f"Local transcription failed: {str(e)}")
-        
-    print(result["segments"])
 
     return result["segments"]
