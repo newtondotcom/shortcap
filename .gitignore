@@ -5,5 +5,5 @@ build/
 dist/
 shortcap.egg-info/
 .env
-*.mp4
 *.mp3
+demo/p.mp4
