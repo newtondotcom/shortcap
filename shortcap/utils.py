@@ -33,10 +33,10 @@ def get_font_path(font: str) -> str:
 
 def detect_local_whisper(print_info: bool) -> bool:
     try:
-        import whisper
+        import whisperx
         use_local_whisper = True
         if print_info:
-            logger.info("Using local whisper model...")
+            logger.info("Using local whisperx model...")
     except ImportError:
         use_local_whisper = False
         if print_info:

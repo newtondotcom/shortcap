@@ -64,6 +64,7 @@ def add_captions(
     initial_prompt: Optional[str] = None,
     segments: Optional[List[Dict[str, Any]]] = None,
     use_local_whisper: str = "auto",
+    align_words : bool = True,
 ) -> CompositeVideoClip:
     try:
         _start_time = time.time()
@@ -100,8 +101,9 @@ def add_captions(
 
             try:
                 if use_local_whisper:
-                    segments = transcriber.transcribe_locally(temp_audio_file, initial_prompt)
+                    segments = transcriber.transcribe_locally(temp_audio_file, align_words)
                 else:
+                    ### Deprecated because non alignment
                     segments = transcriber.transcribe_with_api(temp_audio_file, initial_prompt)
             except Exception as e:
                 raise CaptionError(f"Failed to transcribe audio: {str(e)}")
@@ -129,26 +131,33 @@ def add_captions(
         )
 
         for caption in captions:
+            # Generate individual word-timed captions like ASS's \k tags
             captions_to_draw = []
             if highlight_current_word:
                 for i, word in enumerate(caption["words"]):
-                    if i+1 < len(caption["words"]):
-                        end = caption["words"][i+1]["start"]
-                    else:
-                        end = word["end"]
-
+                    start = word["start"]
+                    end = caption["words"][i + 1]["start"] if i + 1 < len(caption["words"]) else word["end"]
                     captions_to_draw.append({
-                        "text": caption["text"],
-                        "start": word["start"],
+                        "text": word["word"].strip(),
+                        "start": start,
                         "end": end,
+                        "index": i
                     })
             else:
-                captions_to_draw.append(caption)
+                captions_to_draw.append({
+                    "text": caption["text"],
+                    "start": caption["start"],
+                    "end": caption["end"],
+                    "index": -1,
+                })
 
-            for current_index, caption in enumerate(captions_to_draw):
-                line_data = calculate_lines(caption["text"], font, font_size, stroke_width, text_bbox_width)
+            for current_index, word_caption in enumerate(captions_to_draw):
+                # Use text layout logic
+                line_data = calculate_lines(
+                    word_caption["text"], font, font_size, stroke_width, text_bbox_width
+                )
 
-                # Calculate vertical position
+                # Vertical alignment
                 if isinstance(position, int):
                     text_y_offset = position
                 elif position == "center":
@@ -158,45 +167,50 @@ def add_captions(
                 elif position == "bottom":
                     text_y_offset = video.h - line_data["height"] - padding
                 else:
-                    raise ValueError("Invalid vertical position. Use 'center', 'top', 'bottom', or an integer.")
+                    raise ValueError("Invalid vertical position.")
 
-                index = 0
                 for line in line_data["lines"]:
                     pos = ("center", text_y_offset)
 
-                    words = line["text"].split()
-                    word_list = []
-                    for w in words:
-                        word_obj = Word(w)
-                        if highlight_current_word and index == current_index:
+                    word_objects = []
+                    for i, word in enumerate(line["text"].split()):
+                        word_obj = Word(word)
+                        if highlight_current_word and i == word_caption.get("index"):
                             word_obj.set_color(word_highlight_color)
-                        index += 1
-                        word_list.append(word_obj)
+                        word_objects.append(word_obj)
 
-                    # Create shadow
-                    shadow_left = shadow_strength
-                    while shadow_left >= 1:
-                        shadow_left -= 1
-                        shadow = create_shadow(line["text"], font_size, font, shadow_blur, opacity=1)
-                        shadow = shadow.set_start(caption["start"])
-                        shadow = shadow.set_duration(caption["end"] - caption["start"])
-                        shadow = shadow.set_position(pos)
+                    # Shadow layers (fading if shadow_strength isn't an int)
+                    remaining_shadow = shadow_strength
+                    while remaining_shadow >= 1:
+                        shadow = create_shadow(
+                            line["text"], font_size, font, shadow_blur, opacity=1
+                        ).set_start(word_caption["start"]).set_duration(
+                            word_caption["end"] - word_caption["start"]
+                        ).set_position(pos)
+                        clips.append(shadow)
+                        remaining_shadow -= 1
+
+                    if remaining_shadow > 0:
+                        shadow = create_shadow(
+                            line["text"], font_size, font, shadow_blur, opacity=remaining_shadow
+                        ).set_start(word_caption["start"]).set_duration(
+                            word_caption["end"] - word_caption["start"]
+                        ).set_position(pos)
                         clips.append(shadow)
 
-                    if shadow_left > 0:
-                        shadow = create_shadow(line["text"], font_size, font, shadow_blur, opacity=shadow_left)
-                        shadow = shadow.set_start(caption["start"])
-                        shadow = shadow.set_duration(caption["end"] - caption["start"])
-                        shadow = shadow.set_position(pos)
-                        clips.append(shadow)
+                    # Text clip
+                    text = create_text_ex(
+                        word_objects,
+                        font_size,
+                        font_color,
+                        font,
+                        stroke_color=stroke_color,
+                        stroke_width=stroke_width,
+                    ).set_start(word_caption["start"]).set_duration(
+                        word_caption["end"] - word_caption["start"]
+                    ).set_position(pos)
 
-                    # Create text
-                    text = create_text_ex(word_list, font_size, font_color, font, stroke_color=stroke_color, stroke_width=stroke_width)
-                    text = text.set_start(caption["start"])
-                    text = text.set_duration(caption["end"] - caption["start"])
-                    text = text.set_position(pos)
                     clips.append(text)
-
                     text_y_offset += line["height"]
 
         end_time = time.time()

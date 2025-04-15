@@ -18,7 +18,7 @@ def has_partial_sentence(text):
 def parse(
     segments: List[Dict[str, Any]],
     fit_function: Callable[[str], bool],
-    allow_partial_sentences: bool = False,
+    allow_partial_sentences: bool = True,
 ) -> List[Dict[str, Any]]:
     try:
         captions = []
