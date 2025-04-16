@@ -27,3 +27,6 @@ MODEL = "large-v3-turbo"
 DEVICE = "cpu" 
 BATCH_SIZE = 16 # reduce if low on GPU mem
 COMPUTE_TYPE = "int8" # change to "int8" if low on GPU mem (may reduce accuracy)
+
+# emojis store directory
+EMOJIS_DIR = "shortcap/assets/emojis/"

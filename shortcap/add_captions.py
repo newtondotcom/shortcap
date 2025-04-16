@@ -7,6 +7,7 @@ import os
 import logging
 import pkg_resources
 
+from . import emojis
 from . import segment_parser
 from . import transcriber
 from .text_renderer import (
@@ -16,7 +17,6 @@ from .text_renderer import (
 from .utils import (
     ffmpeg,
     get_font_path,
-    detect_local_whisper,
     fits_frame,
     calculate_lines,
     create_shadow,
@@ -34,6 +34,7 @@ from .config import (
     DEFAULT_SHADOW_STRENGTH,
     DEFAULT_SHADOW_BLUR,
     DEFAULT_POSITION,
+    EMOJIS_DIR
 )
 
 lines_cache = {}
@@ -94,12 +95,8 @@ def add_captions(
         if segments is None:
             if print_info:
                 logger.info("Transcribing audio...")
-
-            if use_local_whisper == "auto":
-                use_local_whisper = detect_local_whisper(print_info)
-
             try:
-                segments = transcriber.transcribe_locally(temp_audio_file, align_words,language)
+                segments, language = transcriber.transcribe_locally(temp_audio_file, align_words,language)
             except Exception as e:
                 raise CaptionError(f"Failed to transcribe audio: {str(e)}")
 
@@ -125,6 +122,14 @@ def add_captions(
             ),
         )
 
+        """         
+        emojis_list = emojis.fetch_similar_emojis(captions, language)
+        emojis_list = [
+            (EMOJIS_DIR + emoji["number"] + ".png", emoji["start"], emoji["end"], emoji["offset"])
+            for emoji in emojis_list
+        ]
+        """
+        
         for caption in captions:
             # Generate individual word-timed captions like ASS's \k tags
             captions_to_draw = []
