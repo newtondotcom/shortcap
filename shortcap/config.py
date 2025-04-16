@@ -1,8 +1,6 @@
-import os
-
 # default font config
-DEFAULT_FONT = "TitanOne-Regular.ttf"
-DEFAULT_FONT_SIZE = 100
+DEFAULT_FONT = "SF-Pro.ttf"
+DEFAULT_FONT_SIZE = 50
 DEFAULT_FONT_COLOR = "yellow"
 
 # default stroke config
