@@ -61,10 +61,9 @@ def add_captions(
     shadow_strength: float = DEFAULT_SHADOW_STRENGTH,
     shadow_blur: float = DEFAULT_SHADOW_BLUR,
     print_info: bool = False,
-    initial_prompt: Optional[str] = None,
     segments: Optional[List[Dict[str, Any]]] = None,
-    use_local_whisper: str = "auto",
     align_words : bool = True,
+    language : Optional[str] = None,
 ) -> CompositeVideoClip:
     try:
         _start_time = time.time()
@@ -100,11 +99,7 @@ def add_captions(
                 use_local_whisper = detect_local_whisper(print_info)
 
             try:
-                if use_local_whisper:
-                    segments = transcriber.transcribe_locally(temp_audio_file, align_words)
-                else:
-                    ### Deprecated because non alignment
-                    segments = transcriber.transcribe_with_api(temp_audio_file, initial_prompt)
+                segments = transcriber.transcribe_locally(temp_audio_file, align_words,language)
             except Exception as e:
                 raise CaptionError(f"Failed to transcribe audio: {str(e)}")
 

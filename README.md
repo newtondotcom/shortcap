@@ -30,9 +30,12 @@ shortcap <video_file> <output_file>
 ## Features
 
 - Automatic speech recognition using OpenAI's Whisper
+- Accurate word-level timestamps using wav2vec2 alignment
 - Customizable caption styling
-- Support for local Whisper model or OpenAI API
+- Running locally with whisperx 
 - Command-line interface and programmatic usage
+
+> I have decided to drop OpenAI Whisper's API because the output won't support alignements.
 
 ## Example
 
@@ -85,25 +88,6 @@ For example:
 - `position =  100`: Centers the text horizontally and places it 100 pixels from the top of the video
 
 The default value is `"center"`, which centers the text both horizontally and vertically.
-
-## Using Whisper Locally
-
-By default, OpenAI Whisper is used locally if the `openai-whisper` package is installed. Otherwise, the OpenAI Whisper API is used. To force the use of the API:
-
-```python
-shortcap.add_captions(
-video_file="my_short.mp4",
-output_file="my_short_with_captions.mp4",
-use_local_whisper=False,
-)
-```
-
-
-Install shortcap with local Whisper support:
-
-```bash
-pip install shortcap[local_whisper]
-```
 
 ## Command-line Options
 

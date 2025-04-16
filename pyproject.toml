@@ -19,11 +19,6 @@ dependencies = [
     "whisperx",
 ]
 
-[project.optional-dependencies]
-local_whisper = [
-    "openai-whisper"
-]
-
 [project.urls]
 Homepage = "https://github.com/newtondotcom/shortcap"
 

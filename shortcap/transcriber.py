@@ -1,11 +1,11 @@
 import logging
-import numpy as np
 from .config import (
     DEVICE,
     BATCH_SIZE,
     COMPUTE_TYPE,
     MODEL
 )
+from typing import Optional
 
 # 获取 logger
 logger = logging.getLogger('shortcap.transcriber')
@@ -14,20 +14,14 @@ class TranscriptionError(Exception):
     """Custom exception class for handling errors during transcription"""
     pass
 
-def transcribe_with_api(
-    audio_file,
-    prompt: str | None = None
-):
-    exit()
-    return []
-
 def transcribe_locally(
     audio_file: str,
-    align_words : bool
+    align_words : bool,
+    language : Optional[str]
 ):
     """
-    Transcribe an audio file using the local Whisper package
-    (https://pypi.org/project/openai-whisper/)
+    Transcribe an audio file using the whisperx package
+    (https://github.com/m-bain/whisperX)
     """
       
     try:
@@ -45,7 +39,7 @@ def transcribe_locally(
 
     try:
         logger.info("Starting local transcription")
-        result = model.transcribe(audio_file, batch_size=BATCH_SIZE)
+        result = model.transcribe(audio_file, batch_size=BATCH_SIZE,language=language)
         logger.info("Local transcription completed successfully")
     except Exception as e:
         logger.error(f"Error during local transcription: {str(e)}")

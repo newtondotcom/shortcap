@@ -45,9 +45,10 @@ def main():
     parser.add_argument("--position", default=DEFAULT_POSITION, help="Vertical position of the text")
     parser.add_argument("--shadow-strength", type=float, default=DEFAULT_SHADOW_STRENGTH, help="Shadow strength")
     parser.add_argument("--shadow-blur", type=float, default=DEFAULT_SHADOW_BLUR, help="Shadow blur")
-    parser.add_argument("--use-local-whisper", choices=["auto", "true", "false"], default="auto", help="Use local Whisper model")
     parser.add_argument("--initial-prompt", help="Initial prompt for transcription")
     parser.add_argument("--log-file", help="Path to log file")
+    parser.add_argument("--language",type=str, help="Language of the file to subtitle")
+    parser.add_argument("--align-words",type=bool, help="Accurate word-level timestamps using wav2vec2 alignment")
     parser.add_argument("--verbose", "-v", action="store_true", help="Increase output verbosity")
 
     args = parser.parse_args()
@@ -63,8 +64,6 @@ def main():
     start_time = time.time()
 
     try:
-        use_local_whisper = None if args.use_local_whisper == "auto" else (args.use_local_whisper == "true")
-
         add_captions(
             args.video_file, 
             args.output_file, 
@@ -82,7 +81,7 @@ def main():
             shadow_blur=args.shadow_blur,
             print_info=args.verbose,
             initial_prompt=args.initial_prompt,
-            use_local_whisper=use_local_whisper,
+            language=args.language
         )
         logger.info(f"Captions added successfully. Output saved to {args.output_file}")
     except Exception as e:
