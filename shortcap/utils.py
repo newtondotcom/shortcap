@@ -42,12 +42,9 @@ def analyse_tab_durations(tab):
     moyenne_time = 0
     moyenne_length = 0
     new_tab = []
-    for j in tab:
-        start = j["start"]
-        end = j["end"]
-        word = j["word"]
-        moyenne_time += end - start
-        moyenne_length += len(word)
+    for word in tab:
+        moyenne_time += word["end"] - word["start"]
+        moyenne_length += len(word["word"])
     moyenne_length = moyenne_length / len(tab)
     moyenne_time = moyenne_time / len(tab)
 
@@ -124,7 +121,7 @@ def check_captions(captions):
         if not all(key in caption for key in ["start", "end", "words","text"]):
             raise ValueError("Word missing required keys (start, end, or word)")
         for word in caption["words"]:
-            if not all(key in word for key in ["start", "end", "word","score"]):
+            if not all(key in word for key in ["start", "end", "word"]):
                 print(word, caption)
                 raise ValueError("Word missing required keys (start, end, or word)")
     logger.info("Words array is consistent")

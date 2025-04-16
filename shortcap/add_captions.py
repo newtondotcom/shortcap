@@ -136,7 +136,7 @@ def add_captions(
             if highlight_current_word:
                 for i, word in enumerate(caption["words"]):
                     start = word["start"]
-                    end = caption["words"][i + 1]["start"] if i + 1 < len(caption["words"]) else word["end"]
+                    end = word["end"]  # Previously : caption["words"][i + 1]["start"] if i + 1 < len(caption["words"]) else 
                     captions_to_draw.append({
                         "text": word["word"].strip(),
                         "start": start,
