@@ -4,7 +4,11 @@ Add automatic captions to YouTube & TikTok Shorts (and other videos) using Whisp
 
 ## Demo
 
-![Demo](demo/demo.gif)
+<div style="display: flex;">
+  <img src="demo/input.gif" alt="Input GIF" style="width: 50%; margin-right: 10px;">
+  <img src="demo/output.gif" alt="Output GIF" style="width: 50%;">
+</div>
+
 
 ## Quick Start
 
