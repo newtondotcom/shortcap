@@ -1,4 +1,4 @@
-from typing import Optional, Callable, List, Dict, Any, Tuple, Union
+from typing import Optional, Callable, List, Dict, Any, Union
 from moviepy.editor import VideoFileClip, CompositeVideoClip
 import subprocess
 import tempfile
@@ -121,9 +121,10 @@ def add_captions(
                 text_bbox_width,
             ),
         )
-
-        """         
+       
         emojis_list = emojis.fetch_similar_emojis(captions, language)
+        
+        """  
         emojis_list = [
             (EMOJIS_DIR + emoji["number"] + ".png", emoji["start"], emoji["end"], emoji["offset"])
             for emoji in emojis_list
