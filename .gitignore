@@ -6,4 +6,4 @@ dist/
 shortcap.egg-info/
 .env
 *.mp3
-demo/p.mp4
+demo/output.mp4

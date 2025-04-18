@@ -1,5 +1,5 @@
 # default font config
-DEFAULT_FONT = "SF-Pro.ttf"
+DEFAULT_FONT = "SourceSans3-Black.ttf"
 DEFAULT_FONT_SIZE = 50
 DEFAULT_FONT_COLOR = "yellow"
 
