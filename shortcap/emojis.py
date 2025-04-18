@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Any
 from . import translate
 import re
 
@@ -18,24 +18,26 @@ def remove_punctuation_and_whitespace(text: str) -> str:
         logger.error(f"Error removing punctuation and whitespace: {str(e)}")
         raise EmojisError(f"Error removing punctuation and whitespace: {str(e)}")
 
-def fetch_similar_emojis(array: List[Tuple[str, str, List[str]]], language: str) -> List[List[Optional[str]]]:
+def fetch_similar_emojis(caption: List[Dict[str, Any]], language: str) -> List[List[Optional[str]]]:
+    global flatten_emojis_array
+
     emojis_list: List[List[Optional[str]]] = []
     seen_emojis: Dict[str, List[Optional[str]]] = {}
     translated: List[str] = []
 
     try:
-        for word_group in array:
+        for word_group in caption:
             current_iteration_found_emoji = False
             current_iteration_found_emoji_number = "0"
-            sentence = word_group[2]
+            sentence = word_group["text"].lower()
             try:
-                translated_sentence = translate.translate(" ".join(sentence), language).split(" ")
-                translated.append(translate.translate(" ".join(sentence), language))
+                translated_sentence = translate.translate(sentence, language)
+                translated.append(translated_sentence)
             except Exception as e:
                 logger.error(f"Error translating sentence: {str(e)}")
                 raise EmojisError(f"Error translating sentence: {str(e)}")
 
-            for word in translated_sentence:
+            for word in translated_sentence.split(" "):
                 for line in flatten_emojis_array:
                     number = line[0]
                     emoji_words = line[1]
@@ -44,7 +46,6 @@ def fetch_similar_emojis(array: List[Tuple[str, str, List[str]]], language: str)
                         if echo.lower() == word_clean:
                             current_iteration_found_emoji = True
                             current_iteration_found_emoji_number = number
-                            logger.info(f"Found match for {echo} corresponding to emoji {number}")
 
             if current_iteration_found_emoji:
                 entry = {
@@ -57,8 +58,7 @@ def fetch_similar_emojis(array: List[Tuple[str, str, List[str]]], language: str)
                     seen_emojis[current_iteration_found_emoji_number] = entry
 
         emojis_list = list(seen_emojis.values())
-        logger.info(f"{len(emojis_list)} emojis have been found")
-        logger.info(translated)
+        logger.info(f"{len(emojis_list)} uniques emojis have been found for {translated} : {emojis_list}")
 
         return emojis_list
 
@@ -909,7 +909,7 @@ emojis_array = [
     ["870", "🚚", "delivery truck", ""],
     ["871", "🚛", "articulated lorry", ""],
     ["872", "🚜", "tractor", "tractor"],
-    ["873", "🏎", "racing car", ""],
+    ["873", "🏎", "racing car", "rs6"],
     ["874", "🏍", "motorcycle", "motorcycle"],
     ["875", "🛵", "motor scooter", "scooter"],
     ["876", "🦽", "manual wheelchair", "wheelchair"],
@@ -1955,6 +1955,6 @@ def process_and_flatten_array(array: List[List[str]]) -> List[Tuple[str, List[st
 
 flatten_emojis_array = process_and_flatten_array(emojis_array)
 
-print(fetch_similar_emojis([[0,1,["contrôle","de","police"]]],"fr"))
+print(fetch_similar_emojis([{"start" : 0,"end" : 1 ,"text" : "contrôle de police"}],"fr"))
     
     
