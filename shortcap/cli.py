@@ -45,7 +45,6 @@ def main():
     parser.add_argument("--position", default=DEFAULT_POSITION, help="Vertical position of the text")
     parser.add_argument("--shadow-strength", type=float, default=DEFAULT_SHADOW_STRENGTH, help="Shadow strength")
     parser.add_argument("--shadow-blur", type=float, default=DEFAULT_SHADOW_BLUR, help="Shadow blur")
-    parser.add_argument("--initial-prompt", help="Initial prompt for transcription")
     parser.add_argument("--log-file", help="Path to log file")
     parser.add_argument("--language",type=str, help="Language of the file to subtitle")
     parser.add_argument("--align-words",type=bool, help="Accurate word-level timestamps using wav2vec2 alignment")
@@ -80,7 +79,6 @@ def main():
             shadow_strength=args.shadow_strength,
             shadow_blur=args.shadow_blur,
             print_info=args.verbose,
-            initial_prompt=args.initial_prompt,
             language=args.language
         )
         logger.info(f"Captions added successfully. Output saved to {args.output_file}")
