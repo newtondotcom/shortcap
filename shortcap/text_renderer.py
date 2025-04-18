@@ -11,6 +11,21 @@ logger = logging.getLogger('shortcap.text_renderer')
 
 text_cache = {}
 
+class TextRenderer:
+    def __init__(self, font_path=None, font_size=40, font_color="white", stroke_width=0, stroke_color="black"):
+        if font_path is None:
+            # 使用默认字体
+            font_path = pkg_resources.resource_filename('shortcap', 'assets/fonts/TitanOne-Regular.ttf')
+        
+        if not os.path.exists(font_path):
+            raise FileNotFoundError(f"Font file not found at {font_path}")
+            
+        self.font_path = font_path
+        self.font_size = font_size
+        self.font_color = font_color
+        self.stroke_width = stroke_width
+        self.stroke_color = stroke_color
+
 class Character:
     def __init__(self, text: str, color: Optional[str] = None):
         self.text: str = text
@@ -177,18 +192,3 @@ def create_text_ex(
         text = str_to_charlist(text)
     text_clips = create_text_chars(text, fontsize, color, font, bg_color, blur_radius, opacity, stroke_color, stroke_width)
     return create_composite_text(text_clips, font, fontsize // 3)
-
-class TextRenderer:
-    def __init__(self, font_path=None, font_size=40, font_color="white", stroke_width=0, stroke_color="black"):
-        if font_path is None:
-            # 使用默认字体
-            font_path = pkg_resources.resource_filename('shortcap', 'assets/fonts/TitanOne-Regular.ttf')
-        
-        if not os.path.exists(font_path):
-            raise FileNotFoundError(f"Font file not found at {font_path}")
-            
-        self.font_path = font_path
-        self.font_size = font_size
-        self.font_color = font_color
-        self.stroke_width = stroke_width
-        self.stroke_color = stroke_color
