@@ -1,6 +1,5 @@
 from typing import List, Dict, Callable, Any
 import logging
-from shortcap.utils import analyse_tab_durations, group_words_based_on_threshold, populate_tabs, check_captions
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 import logging
-import os
+from .add_captions import add_captions
+from importlib.metadata import version
 
 def setup_logging(log_file=None):
     logger = logging.getLogger('shortcap')
@@ -31,9 +32,6 @@ logger = setup_logging()
 def configure_logging(log_file=None):
     global logger
     logger = setup_logging(log_file)
-
-from .add_captions import add_captions
-from importlib.metadata import version
 
 __version__ = version("shortcap")
 __all__ = ['add_captions', 'configure_logging']

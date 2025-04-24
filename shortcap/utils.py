@@ -1,11 +1,10 @@
 import os
 import subprocess
-from moviepy.editor import TextClip, VideoClip
+from moviepy.editor import VideoClip
 from .text_renderer import create_text_ex, blur_text_clip
 from typing import List, Tuple, Dict, Any, Callable
 import logging
 from functools import lru_cache
-import pkg_resources
 
 logger = logging.getLogger('shortcap.utils')
 
@@ -144,19 +143,6 @@ def get_font_path(font: str) -> str:
         return font
 
     raise FileNotFoundError(f"Font not found: {font}")
-
-def detect_local_whisper(print_info: bool) -> bool:
-    try:
-        import whisperx
-        use_local_whisper = True
-        if print_info:
-            logger.info("Using local whisperx model...")
-    except ImportError:
-        use_local_whisper = False
-        if print_info:
-            logger.info("Using OpenAI Whisper API...")
-
-    return use_local_whisper
 
 def fits_frame(line_count: int, font: str, font_size: int, stroke_width: int, text_bbox_width: int) -> Callable[[str], bool]:
     def fit_function(text):

@@ -35,3 +35,8 @@ shortcap = [
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.6",
+]

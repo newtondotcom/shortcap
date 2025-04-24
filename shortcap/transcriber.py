@@ -1,10 +1,4 @@
 import logging
-from .config import (
-    DEVICE,
-    BATCH_SIZE,
-    COMPUTE_TYPE,
-    MODEL
-)
 import numpy as np
 from typing import Optional
 
