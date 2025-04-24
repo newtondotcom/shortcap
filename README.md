@@ -4,11 +4,7 @@ Add automatic captions to YouTube & TikTok Shorts (and other videos) using Whisp
 
 ## Demo
 
-<div style="display: flex;">
-  <video alt="Input GIF" style="width: 50%; margin-right: 10px;" autoplay>
-    <source src="demo/anyme.mp4"  type="video/mp4">
-  </video>
-</div>
+![]()
 
 
 ## Quick Start
@@ -17,13 +13,6 @@ Install shortcap:
 
 ```bash
 pip install shortcap
-```
-
-Set required environment variables for OpenAI API:
-
-```bash
-export OPENAI_BASE_URL="your_openai_base_url"
-export OPENAI_API_KEY="your_openai_api_key"
 ```
 
 Use the command-line interface:
@@ -40,7 +29,7 @@ shortcap <video_file> <output_file>
 - Running locally with whisperx 
 - Command-line interface and programmatic usage
 
-> I have decided to drop OpenAI Whisper's API because the output won't support alignements.
+> I have decided to drop OpenAI Whisper's API because idk if the output will support alignements.
 
 ## Example
 
