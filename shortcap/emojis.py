@@ -1,7 +1,13 @@
 import logging
 from typing import List, Tuple, Dict, Optional, Any
+from moviepy.editor import VideoClip, ImageClip
+from PIL import Image
+import numpy as np
 from . import translate
 import re
+from .config import (
+    EMOJIS_DIR
+)
 
 logger = logging.getLogger('shortcap.emojis')
 
@@ -17,8 +23,16 @@ def remove_punctuation_and_whitespace(text: str) -> str:
     except Exception as e:
         logger.error(f"Error removing punctuation and whitespace: {str(e)}")
         raise EmojisError(f"Error removing punctuation and whitespace: {str(e)}")
+    
+def create_emoji_clip(emoji_path: str) -> VideoClip:
+    formatter = {"PNG": "RGBA", "JPEG": "RGB"}
+    img = Image.open(emoji_path).convert('RGBA')
+    rgbaimg = Image.new(formatter.get(img.format, 'RGBA'), img.size)
+    rgbaimg.paste(img)
+    return ImageClip(np.array(rgbaimg))
 
-def fetch_similar_emojis(caption: List[Dict[str, Any]], language: str) -> List[List[Optional[str]]]:
+
+def fetch_similar_emojis(captions: List[Dict[str, Any]], language: str) -> List[List[Optional[str]]]:
     global flatten_emojis_array
 
     emojis_list: List[List[Optional[str]]] = []
@@ -26,7 +40,7 @@ def fetch_similar_emojis(caption: List[Dict[str, Any]], language: str) -> List[L
     translated: List[str] = []
 
     try:
-        for word_group in caption:
+        for word_group in captions:
             current_iteration_found_emoji = False
             current_iteration_found_emoji_number = "0"
             sentence = word_group["text"].lower()
@@ -58,9 +72,16 @@ def fetch_similar_emojis(caption: List[Dict[str, Any]], language: str) -> List[L
                     seen_emojis[current_iteration_found_emoji_number] = entry
 
         emojis_list = list(seen_emojis.values())
-        logger.info(f"{len(emojis_list)} uniques emojis have been found for {translated} : {emojis_list}")
+        logger.info(f"{len(emojis_list)} uniques emojis have been found.")
 
-        return emojis_list
+        ## Adding emojis back to captions array
+        for entry in emojis_list:
+            for caption in captions:
+                if caption["start"] == entry["start"] and caption["end"] == entry["end"]:
+                    caption["emoji"] = EMOJIS_DIR + entry["number"] + ".png"
+                    break
+                    
+        return captions
 
     except Exception as e:
         logger.error(f"Error fetching similar emojis: {str(e)}")
@@ -1955,6 +1976,7 @@ def process_and_flatten_array(array: List[List[str]]) -> List[Tuple[str, List[st
 
 flatten_emojis_array = process_and_flatten_array(emojis_array)
 
-print(fetch_similar_emojis([{"start" : 0,"end" : 1 ,"text" : "contrôle de police"}],"fr"))
+# Test print
+# print(fetch_similar_emojis([{"start" : 0,"end" : 1 ,"text" : "contrôle de police"}],"fr"))
     
     

@@ -5,11 +5,15 @@ def setup_logging(log_file=None):
     logger = logging.getLogger('shortcap')
     logger.setLevel(logging.INFO)
 
+    # Remove polluting logs from PIL
+    logging.getLogger('PIL').setLevel(logging.WARNING)
+
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     # Console handler
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
+
     logger.addHandler(console_handler)
 
     # File handler (optional)

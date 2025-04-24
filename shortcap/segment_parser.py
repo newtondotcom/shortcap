@@ -22,6 +22,7 @@ def parse(
     allow_partial_sentences: bool = True,
 ) -> List[Dict[str, Any]]:
     try:
+
         #captions = []
         #words_flatten = populate_tabs(segments)
         #captions = analyse_tab_durations(words_flatten)
@@ -34,11 +35,12 @@ def parse(
             "end": 0,
             "words": [],
             "text": "",
+            "emoji" : None,
         }
 
         for s, segment in enumerate(segments):
             for w, word in enumerate(segment["words"]):
-                # Some words can't be aligned by whisperx so they dont have any "start" or "end" attributes
+                # Some words like "11" can't be aligned by whisperx so they dont have any "start" or "end" attributes
                 if not all(key in word for key in ["start", "end"]):
                     if "start" not in word:
                         segments[s]["words"][w]["start"] = segment["words"][w - 1]["end"] if (w > 1  and "end" in segment["words"][w - 1] ) else segment["start"]
@@ -50,9 +52,6 @@ def parse(
                 #    segments[s]["words"][w-1]["word"] += word["word"]
                  #   segments[s]["words"][w-1]["end"] = word["end"]
                  #   del segments[s]["words"][w]
-
-        # Check that the captions follow a consistent format
-        check_captions(segments)
 
         # Parse segments into captions that fit on the video
         for segment in segments:
@@ -76,6 +75,7 @@ def parse(
                         "end": word["end"],
                         "words": [word],
                         "text": word["word"],
+                        "emoji" : None,
                     }
 
         captions.append(caption)

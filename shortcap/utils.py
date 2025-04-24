@@ -118,12 +118,11 @@ def group_words_based_on_threshold(
 def check_captions(captions):
     for caption in captions:
         # Check keys exist
-        if not all(key in caption for key in ["start", "end", "words","text"]):
-            raise ValueError("Word missing required keys (start, end, or word)")
+        if not all(key in caption for key in ["start", "end", "words","text","emoji"]):
+            raise ValueError(f"""Word missing required keys ("start", "end", "words","text","emoji") for {caption}""")
         for word in caption["words"]:
             if not all(key in word for key in ["start", "end", "word"]):
-                print(word, caption)
-                raise ValueError("Word missing required keys (start, end, or word)")
+                raise ValueError(f"Word missing required keys (start, end, or word) for {word} in {caption}")
     logger.info("Words array is consistent")
 
 

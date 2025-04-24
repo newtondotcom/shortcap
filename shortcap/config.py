@@ -14,6 +14,7 @@ DEFAULT_SHADOW_BLUR = 0.1
 # default subtitle config
 DEFAULT_LINE_COUNT = 2
 DEFAULT_PADDING = 50
+DEFAULT_PADDING_EMOJI = 5
 
 # default highlight config
 DEFAULT_HIGHLIGHT_CURRENT_WORD = True

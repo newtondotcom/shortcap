@@ -10,6 +10,7 @@ import pkg_resources
 from . import emojis
 from . import segment_parser
 from . import transcriber
+from . import utils
 from .text_renderer import (
     create_text_ex,
     Word,
@@ -34,7 +35,7 @@ from .config import (
     DEFAULT_SHADOW_STRENGTH,
     DEFAULT_SHADOW_BLUR,
     DEFAULT_POSITION,
-    EMOJIS_DIR
+    DEFAULT_PADDING_EMOJI,
 )
 
 lines_cache = {}
@@ -122,16 +123,12 @@ def add_captions(
             ),
         )
        
-        emojis_list = emojis.fetch_similar_emojis(captions, language)
-        
-        """  
-        emojis_list = [
-            (EMOJIS_DIR + emoji["number"] + ".png", emoji["start"], emoji["end"], emoji["offset"])
-            for emoji in emojis_list
-        ]
-        """
+        captions = emojis.fetch_similar_emojis(captions, language)
+
+        utils.check_captions(captions)
         
         for caption in captions:
+
             # Generate individual word-timed captions like ASS's \k tags
             captions_to_draw = []
             if highlight_current_word:
@@ -142,7 +139,7 @@ def add_captions(
                         "text": word["word"].strip(),
                         "start": start,
                         "end": end,
-                        "index": i
+                        "index": i,
                     })
             else:
                 captions_to_draw.append({
@@ -170,8 +167,17 @@ def add_captions(
                 else:
                     raise ValueError("Invalid vertical position.")
 
-                for line in line_data["lines"]:
+                for i, line in enumerate(line_data["lines"]):
                     pos = ("center", text_y_offset)
+
+                    ## Add emoji to caption above first line
+                    if i == 1 and caption["emoji"] :
+                        emoji_clip = emojis.create_emoji_clip(caption["emoji"]
+                        ).set_start(caption["start"]).set_duration(
+                        caption["end"] - caption["start"]
+                        ).set_position(pos + DEFAULT_PADDING_EMOJI )
+                        clips.append(emoji_clip)
+                        logger.info(f"Emoji added: {caption["emoji"]}")
 
                     word_objects = []
                     for i, word in enumerate(line["text"].split()):
