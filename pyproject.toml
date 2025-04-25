@@ -16,6 +16,7 @@ requires-python = ">=3.8"
 
 dependencies = [
     "argostranslate>=1.9.6",
+    "minio>=7.2.7",
     "moviepy==1.0.3",
     "whisperx",
 ]
