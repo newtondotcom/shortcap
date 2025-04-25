@@ -4670,7 +4670,7 @@ wheels = [
 
 [[package]]
 name = "shortcap"
-version = "1.0.8"
+version = "1.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "argostranslate" },

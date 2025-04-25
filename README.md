@@ -9,7 +9,7 @@ Add automatic captions to YouTube & TikTok Shorts (and other videos) using Whisp
 
 ## Quick Start
 
-Install shortcap:
+Install shortcap (original version):
 
 ```bash
 pip install shortcap
@@ -91,11 +91,6 @@ For a full list of command-line options, run:
 shortcap --help
 ```
 
-
-## Changelog
-
-For a detailed list of changes and version updates, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
-
 ## License
 
 This project is licensed under the MIT License.
@@ -107,7 +102,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 If you encounter any problems or have any questions, please open an issue on the GitHub repository.
-
----
-
-For more detailed information on usage and configuration, please refer to the documentation.
