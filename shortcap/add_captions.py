@@ -76,7 +76,7 @@ def add_captions(
         # 修改字体处理逻辑
         if font == DEFAULT_FONT:
             font = pkg_resources.resource_filename(
-                "shortcap", "assets/fonts/TitanOne-Regular.ttf"
+                "shortcap", "assets/fonts/SF-Pro.ttf"
             )
         else:
             font = get_font_path(font)

@@ -2,7 +2,7 @@ import os
 import subprocess
 from moviepy.editor import VideoClip
 from .text_renderer import create_text_ex, blur_text_clip
-from typing import List, Tuple, Dict, Any, Callable
+from typing import List, Tuple, Dict, Any, Callable, Optional
 import logging
 from functools import lru_cache
 
@@ -243,3 +243,29 @@ def get_text_size_ex(
         text, fontsize=fontsize, color="white", font=font, stroke_width=stroke_width
     )
     return text_clip.size
+
+
+
+def generate_thumbnail(path_in: str, thumbnail_path: str) -> None:
+    """Generates a thumbnail from the input video at 1 second using subprocess."""
+    try:
+        # Construct the ffmpeg command
+        command = [
+            "ffmpeg",
+            "-i", path_in,
+            "-ss", "00:00:01",
+            "-vframes", "1",
+            "-vf", "scale=200:100:force_original_aspect_ratio=decrease,pad=200:100:(ow-iw)/2:(oh-ih)/2,crop=200:100",
+            "-y",  # Overwrite output file if it exists
+            thumbnail_path
+        ]
+
+        # Run the ffmpeg command
+        subprocess.run(command, capture_output=True, check=True, text=True)
+        print(f"Thumbnail generated successfully: {thumbnail_path}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"FFmpeg command failed: {e.stderr}")
+        raise RuntimeError(f"FFmpeg command failed: {e.stderr}")
+    except Exception as e:
+        logger.error(f"Error generating thumbnail: {str(e)}")
+        raise RuntimeError(f"Error generating thumbnail: {str(e)}")
