@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, Any, Callable
 import logging
 from functools import lru_cache
 
-logger = logging.getLogger('shortcap.utils')
+logger = logging.getLogger("shortcap.utils")
 
 shadow_cache = {}
 lines_cache = {}
@@ -20,18 +20,24 @@ def populate_tabs(segments):
         exit()
         for i, word in enumerate(s["words"]):
             if i == len(s["words"]) - 1:
-                tab.append({
-                    "start" : word["start"],
-                    "end":  word["end"],
-                    "word" : word["word"],
-                    "final" : True})
+                tab.append(
+                    {
+                        "start": word["start"],
+                        "end": word["end"],
+                        "word": word["word"],
+                        "final": True,
+                    }
+                )
                 # Last word in a sentence
             else:
-                tab.append({
-                    "start" : word["start"],
-                    "end":  word["end"],
-                    "word" : word["word"],
-                    "final" : False})
+                tab.append(
+                    {
+                        "start": word["start"],
+                        "end": word["end"],
+                        "word": word["word"],
+                        "final": False,
+                    }
+                )
                 # Intermediate word
     return tab
 
@@ -56,9 +62,10 @@ def analyse_tab_durations(tab):
             retenue -= 1
         else:
             retenue = group_words_based_on_threshold(
-                tab, new_tab, seuil, j, word , moyenne_time, moyenne_length
+                tab, new_tab, seuil, j, word, moyenne_time, moyenne_length
             )
     return new_tab
+
 
 def group_words_based_on_threshold(
     tab, new_tab, proximity_threshold, index, word, average_time, average_length
@@ -73,10 +80,16 @@ def group_words_based_on_threshold(
             # Check if the word ends with "." or meets time/length criteria
             if "." in word["word"]:
                 return True
-            return word["end"] - word["start"] < average_time or len(word["word"]) < average_length
+            return (
+                word["end"] - word["start"] < average_time
+                or len(word["word"]) < average_length
+            )
         else:
             # Check proximity threshold between current word and next word
-            return word["end"] - word["start"] < proximity_threshold and "." not in word["word"]
+            return (
+                word["end"] - word["start"] < proximity_threshold
+                and "." not in word["word"]
+            )
 
     # Initialize a new group with the current word
     local_combined_words = {
@@ -100,9 +113,11 @@ def group_words_based_on_threshold(
         current_word = tab[index + i]
         previous_word = tab[index + i - 1]
 
-        if is_word_below_threshold(current_word) and is_word_below_threshold(
-            previous_word, current_word
-        ) or "." in current_word["word"]:
+        if (
+            is_word_below_threshold(current_word)
+            and is_word_below_threshold(previous_word, current_word)
+            or "." in current_word["word"]
+        ):
             local_combined_words["words"].append(current_word)
             local_combined_words["end"] = current_word["end"]
             local_combined_words["text"] += " " + current_word["word"]
@@ -114,14 +129,21 @@ def group_words_based_on_threshold(
     new_tab.append(local_combined_words)
     return retenue
 
+
 def check_captions(captions):
     for caption in captions:
         # Check keys exist
-        if not all(key in caption for key in ["start", "end", "words","text","emoji"]):
-            raise ValueError(f"""Word missing required keys ("start", "end", "words","text","emoji") for {caption}""")
+        if not all(
+            key in caption for key in ["start", "end", "words", "text", "emoji"]
+        ):
+            raise ValueError(
+                f"""Word missing required keys ("start", "end", "words","text","emoji") for {caption}"""
+            )
         for word in caption["words"]:
             if not all(key in word for key in ["start", "end", "word"]):
-                raise ValueError(f"Word missing required keys (start, end, or word) for {word} in {caption}")
+                raise ValueError(
+                    f"Word missing required keys (start, end, or word) for {word} in {caption}"
+                )
     logger.info("Words array is consistent")
 
 
@@ -132,6 +154,7 @@ def ffmpeg(command: List[str]) -> subprocess.CompletedProcess:
     except subprocess.CalledProcessError as e:
         logger.error(f"FFmpeg command failed: {e.stderr}")
         raise RuntimeError(f"FFmpeg command failed: {e.stderr}")
+
 
 def get_font_path(font: str) -> str:
     """Get the full path to a font file."""
@@ -144,20 +167,21 @@ def get_font_path(font: str) -> str:
 
     raise FileNotFoundError(f"Font not found: {font}")
 
-def fits_frame(line_count: int, font: str, font_size: int, stroke_width: int, text_bbox_width: int) -> Callable[[str], bool]:
+
+def fits_frame(
+    line_count: int, font: str, font_size: int, stroke_width: int, text_bbox_width: int
+) -> Callable[[str], bool]:
     def fit_function(text):
-        lines = calculate_lines(
-            text,
-            font,
-            font_size,
-            stroke_width,
-            text_bbox_width
-        )
+        lines = calculate_lines(text, font, font_size, stroke_width, text_bbox_width)
         return len(lines["lines"]) <= line_count
+
     return fit_function
 
+
 @lru_cache(maxsize=1024)
-def calculate_lines(text: str, font: str, font_size: int, stroke_width: int, text_bbox_width: int) -> Dict[str, Any]:
+def calculate_lines(
+    text: str, font: str, font_size: int, stroke_width: int, text_bbox_width: int
+) -> Dict[str, Any]:
     lines = []
 
     line_to_draw = None
@@ -201,13 +225,21 @@ def calculate_lines(text: str, font: str, font_size: int, stroke_width: int, tex
         "height": total_height,
     }
 
-@lru_cache(maxsize=1024)
-def create_shadow(text: str, font_size: int, font: str, blur_radius: float, opacity: float = 1.0) -> VideoClip:
-    shadow = create_text_ex(text, font_size, "black", font, opacity=opacity)
-    shadow = blur_text_clip(shadow, int(font_size*blur_radius))
-    return shadow
 
 @lru_cache(maxsize=1024)
-def get_text_size_ex(text: str, font: str, fontsize: int, stroke_width: int) -> Tuple[int, int]:
-    text_clip = create_text_ex(text, fontsize=fontsize, color="white", font=font, stroke_width=stroke_width)
+def create_shadow(
+    text: str, font_size: int, font: str, blur_radius: float, opacity: float = 1.0
+) -> VideoClip:
+    shadow = create_text_ex(text, font_size, "black", font, opacity=opacity)
+    shadow = blur_text_clip(shadow, int(font_size * blur_radius))
+    return shadow
+
+
+@lru_cache(maxsize=1024)
+def get_text_size_ex(
+    text: str, font: str, fontsize: int, stroke_width: int
+) -> Tuple[int, int]:
+    text_clip = create_text_ex(
+        text, fontsize=fontsize, color="white", font=font, stroke_width=stroke_width
+    )
     return text_clip.size

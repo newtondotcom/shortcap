@@ -40,11 +40,14 @@ from .config import (
 
 lines_cache = {}
 
-logger = logging.getLogger('shortcap.add_captions')
+logger = logging.getLogger("shortcap.add_captions")
+
 
 class CaptionError(Exception):
     """Custom exception for errors in the caption process"""
+
     pass
+
 
 def add_captions(
     video_file: str,
@@ -64,15 +67,17 @@ def add_captions(
     shadow_blur: float = DEFAULT_SHADOW_BLUR,
     print_info: bool = False,
     segments: Optional[List[Dict[str, Any]]] = None,
-    align_words : bool = True,
-    language : Optional[str] = None,
+    align_words: bool = True,
+    language: Optional[str] = None,
 ) -> CompositeVideoClip:
     try:
         _start_time = time.time()
 
         # 修改字体处理逻辑
         if font == DEFAULT_FONT:
-            font = pkg_resources.resource_filename('shortcap', 'assets/fonts/TitanOne-Regular.ttf')
+            font = pkg_resources.resource_filename(
+                "shortcap", "assets/fonts/TitanOne-Regular.ttf"
+            )
         else:
             font = get_font_path(font)
 
@@ -84,12 +89,7 @@ def add_captions(
 
         temp_audio_file = tempfile.NamedTemporaryFile(suffix=".wav").name
         try:
-            ffmpeg([
-                'ffmpeg',
-                '-y',
-                '-i', video_file,
-                temp_audio_file
-            ])
+            ffmpeg(["ffmpeg", "-y", "-i", video_file, temp_audio_file])
         except subprocess.CalledProcessError as e:
             raise CaptionError(f"Failed to extract audio: {str(e)}")
 
@@ -97,7 +97,9 @@ def add_captions(
             if print_info:
                 logger.info("Transcribing audio...")
             try:
-                segments, language = transcriber.transcribe_locally(temp_audio_file, align_words,language)
+                segments, language = transcriber.transcribe_locally(
+                    temp_audio_file, align_words, language
+                )
             except Exception as e:
                 raise CaptionError(f"Failed to transcribe audio: {str(e)}")
 
@@ -114,7 +116,9 @@ def add_captions(
 
         captions = segment_parser.parse(
             segments=segments,
-            fit_function=fit_function if fit_function else fits_frame(
+            fit_function=fit_function
+            if fit_function
+            else fits_frame(
                 line_count,
                 font,
                 font_size,
@@ -122,32 +126,37 @@ def add_captions(
                 text_bbox_width,
             ),
         )
-       
+
         captions = emojis.fetch_similar_emojis(captions, language)
 
         utils.check_captions(captions)
-        
-        for caption in captions:
 
+        for caption in captions:
             # Generate individual word-timed captions like ASS's \k tags
             captions_to_draw = []
             if highlight_current_word:
                 for i, word in enumerate(caption["words"]):
                     start = word["start"]
-                    end = word["end"]  # Previously : caption["words"][i + 1]["start"] if i + 1 < len(caption["words"]) else 
-                    captions_to_draw.append({
-                        "text": word["word"].strip(),
-                        "start": start,
-                        "end": end,
-                        "index": i,
-                    })
+                    end = word[
+                        "end"
+                    ]  # Previously : caption["words"][i + 1]["start"] if i + 1 < len(caption["words"]) else
+                    captions_to_draw.append(
+                        {
+                            "text": word["word"].strip(),
+                            "start": start,
+                            "end": end,
+                            "index": i,
+                        }
+                    )
             else:
-                captions_to_draw.append({
-                    "text": caption["text"],
-                    "start": caption["start"],
-                    "end": caption["end"],
-                    "index": -1,
-                })
+                captions_to_draw.append(
+                    {
+                        "text": caption["text"],
+                        "start": caption["start"],
+                        "end": caption["end"],
+                        "index": -1,
+                    }
+                )
 
             for current_index, word_caption in enumerate(captions_to_draw):
                 # Use text layout logic
@@ -171,13 +180,15 @@ def add_captions(
                     pos = ("center", text_y_offset)
 
                     ## Add emoji to caption above first line
-                    if i == 1 and caption["emoji"] :
-                        emoji_clip = emojis.create_emoji_clip(caption["emoji"]
-                        ).set_start(caption["start"]).set_duration(
-                        caption["end"] - caption["start"]
-                        ).set_position(pos + DEFAULT_PADDING_EMOJI )
+                    if i == 1 and caption["emoji"]:
+                        emoji_clip = (
+                            emojis.create_emoji_clip(caption["emoji"])
+                            .set_start(caption["start"])
+                            .set_duration(caption["end"] - caption["start"])
+                            .set_position(pos + DEFAULT_PADDING_EMOJI)
+                        )
                         clips.append(emoji_clip)
-                        logger.info(f"Emoji added: {caption["emoji"]}")
+                        logger.info(f"Emoji added: {caption['emoji']}")
 
                     word_objects = []
                     for i, word in enumerate(line["text"].split()):
@@ -189,33 +200,46 @@ def add_captions(
                     # Shadow layers (fading if shadow_strength isn't an int)
                     remaining_shadow = shadow_strength
                     while remaining_shadow >= 1:
-                        shadow = create_shadow(
-                            line["text"], font_size, font, shadow_blur, opacity=1
-                        ).set_start(word_caption["start"]).set_duration(
-                            word_caption["end"] - word_caption["start"]
-                        ).set_position(pos)
+                        shadow = (
+                            create_shadow(
+                                line["text"], font_size, font, shadow_blur, opacity=1
+                            )
+                            .set_start(word_caption["start"])
+                            .set_duration(word_caption["end"] - word_caption["start"])
+                            .set_position(pos)
+                        )
                         clips.append(shadow)
                         remaining_shadow -= 1
 
                     if remaining_shadow > 0:
-                        shadow = create_shadow(
-                            line["text"], font_size, font, shadow_blur, opacity=remaining_shadow
-                        ).set_start(word_caption["start"]).set_duration(
-                            word_caption["end"] - word_caption["start"]
-                        ).set_position(pos)
+                        shadow = (
+                            create_shadow(
+                                line["text"],
+                                font_size,
+                                font,
+                                shadow_blur,
+                                opacity=remaining_shadow,
+                            )
+                            .set_start(word_caption["start"])
+                            .set_duration(word_caption["end"] - word_caption["start"])
+                            .set_position(pos)
+                        )
                         clips.append(shadow)
 
                     # Text clip
-                    text = create_text_ex(
-                        word_objects,
-                        font_size,
-                        font_color,
-                        font,
-                        stroke_color=stroke_color,
-                        stroke_width=stroke_width,
-                    ).set_start(word_caption["start"]).set_duration(
-                        word_caption["end"] - word_caption["start"]
-                    ).set_position(pos)
+                    text = (
+                        create_text_ex(
+                            word_objects,
+                            font_size,
+                            font_color,
+                            font,
+                            stroke_color=stroke_color,
+                            stroke_width=stroke_width,
+                        )
+                        .set_start(word_caption["start"])
+                        .set_duration(word_caption["end"] - word_caption["start"])
+                        .set_position(pos)
+                    )
 
                     clips.append(text)
                     text_y_offset += line["height"]
@@ -224,7 +248,9 @@ def add_captions(
         generation_time = end_time - _start_time
 
         if print_info:
-            logger.info(f"Generated in {generation_time//60:02.0f}:{generation_time%60:02.0f} ({len(clips)} clips)")
+            logger.info(
+                f"Generated in {generation_time // 60:02.0f}:{generation_time % 60:02.0f} ({len(clips)} clips)"
+            )
             logger.info("Rendering video...")
 
         video_with_text = CompositeVideoClip(clips)
@@ -244,9 +270,13 @@ def add_captions(
         render_time = total_time - generation_time
 
         if print_info:
-            logger.info(f"Generated in {generation_time//60:02.0f}:{generation_time%60:02.0f}")
-            logger.info(f"Rendered in {render_time//60:02.0f}:{render_time%60:02.0f}")
-            logger.info(f"Done in {total_time//60:02.0f}:{total_time%60:02.0f}")
+            logger.info(
+                f"Generated in {generation_time // 60:02.0f}:{generation_time % 60:02.0f}"
+            )
+            logger.info(
+                f"Rendered in {render_time // 60:02.0f}:{render_time % 60:02.0f}"
+            )
+            logger.info(f"Done in {total_time // 60:02.0f}:{total_time % 60:02.0f}")
 
         return video_with_text
 
@@ -258,9 +288,8 @@ def add_captions(
         raise CaptionError(f"An unexpected error occurred: {str(e)}")
     finally:
         # Clean up temporary files
-        if 'temp_audio_file' in locals():
+        if "temp_audio_file" in locals():
             try:
                 os.remove(temp_audio_file)
             except Exception as e:
                 logger.warning(f"Failed to remove temporary audio file: {str(e)}")
-

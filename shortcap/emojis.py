@@ -5,15 +5,16 @@ from PIL import Image
 import numpy as np
 from . import translate
 import re
-from .config import (
-    EMOJIS_DIR
-)
+from .config import EMOJIS_DIR
 
-logger = logging.getLogger('shortcap.emojis')
+logger = logging.getLogger("shortcap.emojis")
+
 
 class EmojisError(Exception):
     """Custom exception class for handling errors during emojis operations"""
+
     pass
+
 
 def remove_punctuation_and_whitespace(text: str) -> str:
     try:
@@ -23,16 +24,19 @@ def remove_punctuation_and_whitespace(text: str) -> str:
     except Exception as e:
         logger.error(f"Error removing punctuation and whitespace: {str(e)}")
         raise EmojisError(f"Error removing punctuation and whitespace: {str(e)}")
-    
+
+
 def create_emoji_clip(emoji_path: str) -> VideoClip:
     formatter = {"PNG": "RGBA", "JPEG": "RGB"}
-    img = Image.open(emoji_path).convert('RGBA')
-    rgbaimg = Image.new(formatter.get(img.format, 'RGBA'), img.size)
+    img = Image.open(emoji_path).convert("RGBA")
+    rgbaimg = Image.new(formatter.get(img.format, "RGBA"), img.size)
     rgbaimg.paste(img)
     return ImageClip(np.array(rgbaimg))
 
 
-def fetch_similar_emojis(captions: List[Dict[str, Any]], language: str) -> List[List[Optional[str]]]:
+def fetch_similar_emojis(
+    captions: List[Dict[str, Any]], language: str
+) -> List[List[Optional[str]]]:
     global flatten_emojis_array
 
     emojis_list: List[List[Optional[str]]] = []
@@ -63,10 +67,10 @@ def fetch_similar_emojis(captions: List[Dict[str, Any]], language: str) -> List[
 
             if current_iteration_found_emoji:
                 entry = {
-                    "number" : current_iteration_found_emoji_number,
-                    "start" : word_group["start"],
-                    "end" : word_group["end"],
-                    "offset" : 1 if len(sentence) > 3 else 0,
+                    "number": current_iteration_found_emoji_number,
+                    "start": word_group["start"],
+                    "end": word_group["end"],
+                    "offset": 1 if len(sentence) > 3 else 0,
                 }
                 if current_iteration_found_emoji_number not in seen_emojis:
                     seen_emojis[current_iteration_found_emoji_number] = entry
@@ -77,10 +81,13 @@ def fetch_similar_emojis(captions: List[Dict[str, Any]], language: str) -> List[
         ## Adding emojis back to captions array
         for entry in emojis_list:
             for caption in captions:
-                if caption["start"] == entry["start"] and caption["end"] == entry["end"]:
+                if (
+                    caption["start"] == entry["start"]
+                    and caption["end"] == entry["end"]
+                ):
                     caption["emoji"] = EMOJIS_DIR + entry["number"] + ".png"
                     break
-                    
+
         return captions
 
     except Exception as e:
@@ -1956,6 +1963,7 @@ emojis_array = [
     ["1816", "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "flag: Wales", "Wales;Welsh"],
 ]
 
+
 def process_and_flatten_array(array: List[List[str]]) -> List[Tuple[str, List[str]]]:
     """
     Process the input array and flatten it according to the specified logic.
@@ -1974,9 +1982,8 @@ def process_and_flatten_array(array: List[List[str]]) -> List[Tuple[str, List[st
     flatten_array = [[item[0], item[3].split(";")] for item in array]
     return flatten_array
 
+
 flatten_emojis_array = process_and_flatten_array(emojis_array)
 
 # Test print
 # print(fetch_similar_emojis([{"start" : 0,"end" : 1 ,"text" : "contrôle de police"}],"fr"))
-    
-    

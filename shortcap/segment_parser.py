@@ -3,9 +3,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SegmentParseError(Exception):
     """Custom exception for errors in segment parsing"""
+
     pass
+
 
 def has_partial_sentence(text):
     words = text.split()
@@ -15,18 +18,18 @@ def has_partial_sentence(text):
             return True
     return False
 
+
 def parse(
     segments: List[Dict[str, Any]],
     fit_function: Callable[[str], bool],
     allow_partial_sentences: bool = True,
 ) -> List[Dict[str, Any]]:
     try:
-
-        #captions = []
-        #words_flatten = populate_tabs(segments)
-        #captions = analyse_tab_durations(words_flatten)
-        #print(len(captions), len(words_flatten))
-        #return captions
+        # captions = []
+        # words_flatten = populate_tabs(segments)
+        # captions = analyse_tab_durations(words_flatten)
+        # print(len(captions), len(words_flatten))
+        # return captions
 
         captions = []
         caption = {
@@ -34,7 +37,7 @@ def parse(
             "end": 0,
             "words": [],
             "text": "",
-            "emoji" : None,
+            "emoji": None,
         }
 
         for s, segment in enumerate(segments):
@@ -42,15 +45,26 @@ def parse(
                 # Some words like "11" can't be aligned by whisperx so they dont have any "start" or "end" attributes
                 if not all(key in word for key in ["start", "end"]):
                     if "start" not in word:
-                        segments[s]["words"][w]["start"] = segment["words"][w - 1]["end"] if (w > 1  and "end" in segment["words"][w - 1] ) else segment["start"]
+                        segments[s]["words"][w]["start"] = (
+                            segment["words"][w - 1]["end"]
+                            if (w > 1 and "end" in segment["words"][w - 1])
+                            else segment["start"]
+                        )
                     if "end" not in word:
-                        segments[s]["words"][w]["end"] = segment["words"][w + 1]["start"] if (w+1 < len(segment["words"]) and "start" in segment["words"][w + 1] ) else  segment["end"]
-                        
+                        segments[s]["words"][w]["end"] = (
+                            segment["words"][w + 1]["start"]
+                            if (
+                                w + 1 < len(segment["words"])
+                                and "start" in segment["words"][w + 1]
+                            )
+                            else segment["end"]
+                        )
+
                 # Merge words that are not separated by spaces
-                #if w > 0 and word["word"][0] != " ":
+                # if w > 0 and word["word"][0] != " ":
                 #    segments[s]["words"][w-1]["word"] += word["word"]
-                 #   segments[s]["words"][w-1]["end"] = word["end"]
-                 #   del segments[s]["words"][w]
+                #   segments[s]["words"][w-1]["end"] = word["end"]
+                #   del segments[s]["words"][w]
 
         # Parse segments into captions that fit on the video
         for segment in segments:
@@ -74,7 +88,7 @@ def parse(
                         "end": word["end"],
                         "words": [word],
                         "text": word["word"],
-                        "emoji" : None,
+                        "emoji": None,
                     }
 
         captions.append(caption)
